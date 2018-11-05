@@ -25,3 +25,9 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.android.support:support-v7:25.3.1'
+    }
+}
