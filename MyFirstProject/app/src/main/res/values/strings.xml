@@ -3,4 +3,17 @@
     <string name="enter_message">Enter Text Here!</string>
     <string name="button_send">Send!</string>
     <string name="title_activity_display_message">DisplayMessageActivity</string>
+    <string name="game_1_title">Stroop Effect</string>
+    <string name="game_2_title">Working Memory</string>
+    <string name="title_activity_stroop">StroopActivity</string>
+    <string name="color_red">RED</string>
+    <string name="color_orange">ORANGE</string>
+    <string name="color_yellow">YELLOW</string>
+    <string name="color_green">GREEN</string>
+    <string name="color_grey">GREY</string>
+    <string name="color_blue">BLUE</string>
+    <string name="now">Now</string>
+    <string name="confirmDateTimeUpdateMessage">Overwrite existing date/time?</string>
+    <string name="WhatTimeIsIt">What time is it?</string>
+    <string name="WhatTimeIDFragment">WTISQ</string>
 </resources>
