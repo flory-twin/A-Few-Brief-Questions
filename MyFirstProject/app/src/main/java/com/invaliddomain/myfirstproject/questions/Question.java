@@ -1,4 +1,4 @@
-package com.invaliddomain.myfirstproject;
+package com.invaliddomain.myfirstproject.questions;
 
 public class Question {
     protected String questionAsText;

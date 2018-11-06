@@ -1,4 +1,4 @@
-package com.invaliddomain.myfirstproject;
+package com.invaliddomain.myfirstproject.questions;
 
 public class DateTimeQuestionViewSeriesIdentifierFactory {
     private static int questionCounter = -1;

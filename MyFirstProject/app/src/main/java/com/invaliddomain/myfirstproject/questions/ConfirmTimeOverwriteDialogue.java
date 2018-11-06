@@ -1,10 +1,12 @@
-package com.invaliddomain.myfirstproject;
+package com.invaliddomain.myfirstproject.questions;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+
+import com.invaliddomain.myfirstproject.R;
 
 public class ConfirmTimeOverwriteDialogue extends DialogFragment {
 

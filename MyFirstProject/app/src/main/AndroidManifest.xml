@@ -22,7 +22,7 @@
 
         </activity>
         <service
-            android:name="DataSyncService"
+            android:name=".com.invaliddomain.myfirstproject.data.DataSyncService"
             android:exported="false"/>
     </application>
 

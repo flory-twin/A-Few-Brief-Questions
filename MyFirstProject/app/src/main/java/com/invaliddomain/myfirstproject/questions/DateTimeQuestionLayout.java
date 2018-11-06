@@ -1,28 +1,24 @@
-package com.invaliddomain.myfirstproject;
+package com.invaliddomain.myfirstproject.questions;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import java.util.Calendar;
+import com.invaliddomain.myfirstproject.R;
+import com.invaliddomain.myfirstproject.questions.DateTimeQuestion;
+
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class DateTimeQuestionLayout extends ConstraintLayout {
     //Top-level view
