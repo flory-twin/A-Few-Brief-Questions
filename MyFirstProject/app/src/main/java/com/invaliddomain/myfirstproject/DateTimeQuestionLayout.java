@@ -1,11 +1,13 @@
 package com.invaliddomain.myfirstproject;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.util.AttributeSet;
@@ -150,42 +152,66 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     }
 
     private void initializeDateTimeOnClickListener() {
+        final TimePickerDialog.OnTimeSetListener setListener = new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage(R.string.confirmDateTimeUpdateMessage)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dtQuestion.setAnswerToNow();
+                                repaintDTLabel();
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog; no actions.
+                                dialog.dismiss();
+                            }
+                        });
+                builder.show();
+            }
+        };
+
+        final int hours = (dtQuestion == null ?
+                new Date().getHours() :
+                dtQuestion.getAnswerAsDate() == null ?
+                        new Date().getHours() :
+                        dtQuestion.getAnswerAsDate().getHours());
+        final int minutes = (dtQuestion == null ?
+                new Date().getMinutes() :
+                dtQuestion.getAnswerAsDate() == null ?
+                        new Date().getMinutes() :
+                        dtQuestion.getAnswerAsDate().getMinutes());
+
         OnClickListener dateTimeOnClickListener = new OnClickListener() {
             @Override
             public void onClick(View v) {
                 TimePickerDialog timeDialog = new TimePickerDialog(
                         context,
-                        null,
-                        dtQuestion.getAnswerAsDate().getHours(),
-                        dtQuestion.getAnswerAsDate().getMinutes(),
+                        setListener,
+                        hours,
+                        minutes,
                         true) {
+                    //@Override
+                    //public void onCreate
                     @Override
-                    public void onTimeChanged(TimePicker view, final int hourOfDay, final int minute) {
+                    public void onTimeChanged(TimePicker view, final int hourOfDay, final int minute)
+                    {
                         super.onTimeChanged(view, hourOfDay, minute);
                         final Date oldDate = dtQuestion.getAnswerAsDate();
                         //Display a confirmation dialogue.
-                        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-                        builder.setMessage(R.string.confirmDateTimeUpdateMessage)
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dtQuestion.setAnswerToNow();
-                                        repaintDTLabel();
-                                        dialog.dismiss();
-                                    }
-                                })
-                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        // User cancelled the dialog; no actions.
-                                        dialog.dismiss();
-                                    }
-                                });
-                        this.dismiss();
-                        repaint();
+
                     }
 
                 };
+                //timeDialog.create();
+                timeDialog.show();
+                //timeDialog.show();
             }
         };
+        dtLabel.setOnClickListener(dateTimeOnClickListener);
     }
 
 /*    @Override
