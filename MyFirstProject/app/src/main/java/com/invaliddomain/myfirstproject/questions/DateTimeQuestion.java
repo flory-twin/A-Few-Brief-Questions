@@ -1,10 +1,12 @@
 package com.invaliddomain.myfirstproject.questions;
 
+import com.invaliddomain.myfirstproject.questions.base.Question;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-public class DateTimeQuestion extends com.invaliddomain.myfirstproject.questions.Question {
+public class DateTimeQuestion extends Question {
     private Date answerAsDate;
 
     public DateTimeQuestion(String questionText)
