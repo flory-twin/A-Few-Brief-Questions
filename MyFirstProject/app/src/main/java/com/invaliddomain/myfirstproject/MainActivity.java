@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         //this.setContentView(dtqv.getQuestionAnswerLayout());
         this.setContentView(R.layout.activity_main);
 
+        this.dtQuestionViews = new ArrayList<DateTimeQuestionLayout>();
         this.setUpQuestions();
         this.addChildElements();
 
@@ -42,11 +43,10 @@ public class MainActivity extends AppCompatActivity {
     protected void addChildElements() {
         LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         // fill in any details dynamically here
-        ConstraintLayout root = (ConstraintLayout) this.findViewById(R.id.RootLayout);
+        LinearLayout root = (LinearLayout) this.findViewById(R.id.RootLayout);
         ArrayList<Question> questions = questionRecords.getQuestionList();
 
         ConstraintSet constraints = new ConstraintSet();
-        constraints.clone(root);
         int margin = 10;
         DateTimeQuestionLayout lastView = null;
         for (int i = 0; i < questions.size(); i++) {
@@ -54,60 +54,12 @@ public class MainActivity extends AppCompatActivity {
             DateTimeQuestionLayout qView = new DateTimeQuestionLayout(
                     this.getApplicationContext(),
                     questions.get(i).getQuestionAsText());
+            int x = 1+2;
+            this.dtQuestionViews.add(qView);
             root.addView(qView, new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
-            //qView.measure(root.getMeasuredWidth(), root.getMeasuredHeight());
-
-
-            if (i == 0) {
-                //add a constraint
-                constraints.connect(
-                        qView.getId(),
-                        ConstraintSet.LEFT,
-                        root.getId(),
-                        ConstraintSet.LEFT,
-                        20);
-                root.setMinHeight(qView.getMinHeight() + margin + margin);
-                //add in view-level constraints
-
-            } else if (i > 0) {
-                //int heightAdded = 8 + lastView.getMinimumHeight() + lastView.preCalculateMinimumHeight()
-                //add a constraint
-                constraints.connect(
-                        lastView.getId(),
-                        ConstraintSet.BOTTOM,
-                        qView.getId(),
-                        ConstraintSet.TOP);
-                //        8 + lastView.getMinimumHeight() + lastView.preCalculateMinimumHeight());
-
-                //add a constraint
-//                constraints.connect(
-//                        root.getId(),
-//                        ConstraintSet.BOTTOM,
-//                        qView.getId(),
-//                        ConstraintSet.TOP,
-//                        80);
-//                constraints.applyTo(root);
-                root.setMinHeight(root.getMinHeight() + qView.getMinHeight() + margin + margin);
-
-            }
-            lastView = qView;
-            /*
-            DateTimeQuestionLayout lastView = (DateTimeQuestionLayout) root.getChildAt(root.getChildCount()-1);
-            Button b = new Button(this.getApplicationContext());
-            b.setId(View.generateViewId());
-            root.addView(b);
-            constraints.connect(
-                    lastView.getId(),
-                    ConstraintSet.BOTTOM,
-                    b.getId(),
-                    ConstraintSet.TOP,
-                    8);
-                    */
-            //root.setConstraintSet(constraints);
         }
-        constraints.applyTo(root);
         root.invalidate();
     }
 
