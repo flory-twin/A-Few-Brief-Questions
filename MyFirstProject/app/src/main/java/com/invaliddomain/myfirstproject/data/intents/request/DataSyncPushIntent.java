@@ -10,8 +10,9 @@ public class DataSyncPushIntent extends Intent {
 
     private InMemoryDataRecord recordToPush;
 
-    public DataSyncPushIntent(String uri, Context context, Class class, InMemoryDataRecord recordToPush){
-        super(DataSyncPushIntent.PUSH, uri, context, class);
+    public DataSyncPushIntent(Context context, Class clazz, InMemoryDataRecord recordToPush){
+        super(DataSyncPushIntent.PUSH);
+        this.setClass(context, clazz);
         this.recordToPush = recordToPush;
     }
 

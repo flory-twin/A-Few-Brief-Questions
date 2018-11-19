@@ -8,8 +8,9 @@ public class DataSyncPushErrorIntent extends Intent {
 
     private Exception returnedException;
 
-    public DataSyncPushErrorIntent(String uri, Context context, Class class, Exception e){
-        super(DataSyncPushErrorIntent.PUSH_ERROR_RESPONSE, uri, context, class);
+    public DataSyncPushErrorIntent(Context context, Class clazz, Exception e){
+        super(DataSyncPushErrorIntent.PUSH_ERROR_RESPONSE);
+        this.setClass(context, clazz);
         this.returnedException = e;
     }
 

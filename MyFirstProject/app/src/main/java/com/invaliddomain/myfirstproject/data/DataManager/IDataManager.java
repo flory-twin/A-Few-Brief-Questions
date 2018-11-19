@@ -12,6 +12,6 @@ public interface IDataManager {
     public void pushAllRecords() throws Exception;
     public void addToOrUpdateCache(InMemoryDataRecord recordToAddOrUpdate);
     public ArrayList<InMemoryDataRecord> getAllCachedRecords();
-    public InMemoryDataRecord getCachedRecord(DayDate fromThisDate);
+    public InMemoryDataRecord getCachedRecord(DayDate fromThisDate) throws Exception;
     public void pullAllRecords() throws Exception;
 }

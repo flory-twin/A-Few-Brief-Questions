@@ -4,11 +4,17 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 
+import com.invaliddomain.myfirstproject.MainActivity;
 import com.invaliddomain.myfirstproject.data.DataManager.IDataManager;
 import com.invaliddomain.myfirstproject.data.DataManager.LocalFilesystemDataManager;
 import com.invaliddomain.myfirstproject.data.intents.request.DataSyncPullIntent;
 import com.invaliddomain.myfirstproject.data.intents.request.DataSyncPushIntent;
+import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPullCompleteIntent;
+import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPullErrorIntent;
+import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPushCompleteIntent;
+import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPushErrorIntent;
 
 //IntentService?
 
@@ -26,13 +32,13 @@ public class DataSyncService extends IntentService {
      * IPC.
      */
     public class DataSyncBinder extends Binder {
-        DataSyncService getService() {
+        public DataSyncService getService() {
             return DataSyncService.this;
         }
     }
 
     private IDataManager dataStore;
-    private final IBinder serviceBinding;
+    private final IBinder serviceBinding = new DataSyncBinder();
 
 
     /*
@@ -44,7 +50,6 @@ public class DataSyncService extends IntentService {
     {
         super("DataSyncService");
         //dataStore = new
-        this.serviceBinding = null;
     }
 
     /*
@@ -55,7 +60,6 @@ public class DataSyncService extends IntentService {
     @Override
     public void onCreate()
     {
-        this.serviceBinding = new DataSyncBinder();
         this.dataStore = new LocalFilesystemDataManager();
     }
 
@@ -68,40 +72,54 @@ public class DataSyncService extends IntentService {
             return this.serviceBinding;
     }
 
+    public void push(InMemoryDataRecord recordToPush) throws Exception
+    {
+            this.dataStore.addToOrUpdateCache(recordToPush);
+            this.dataStore.pushAllRecords();
+    }
     //Will be called by IntentService to take action on Intents pulled from the internal work queue
     @Override
     public void onHandleIntent(Intent intent)
     {
         if (intent.getClass().equals(DataSyncPushIntent.class))
         {
-            dataStore
-            dataStore.pushAllRecords();
+            dataStore.addToOrUpdateCache(((DataSyncPushIntent) intent).getRecord());
+            try {
+                dataStore.pushAllRecords();
+                //If we're still executing, we completed successfully.
+                DataSyncPushCompleteIntent pushComplete = new DataSyncPushCompleteIntent(this.getApplicationContext(), MainActivity.class);
+                this.sendResponseStatus(pushComplete);
+
+            } catch (Exception e)
+            {
+                DataSyncPushErrorIntent pushError = new DataSyncPushErrorIntent(this.getApplicationContext(), MainActivity.class, e);
+                this.sendResponseStatus(pushError);
+            }
         }
         else if (intent.getClass().equals(DataSyncPullIntent.class))
-        {}
+        {
+            try {
+                dataStore.pullAllRecords(); //Have to pull complete file at once.
+                InMemoryDataRecord pulledRecord = dataStore.getCachedRecord(((DataSyncPullIntent) intent).getWhenToPullFrom());
+                //If we're still executing, we completed successfully.
+                DataSyncPullCompleteIntent pullComplete = new DataSyncPullCompleteIntent(this.getApplicationContext(), MainActivity.class, pulledRecord);
+                this.sendResponseStatus(pullComplete);
+
+            } catch (Exception e)
+            {
+                DataSyncPullErrorIntent pullError = new DataSyncPullErrorIntent(this.getApplicationContext(), MainActivity.class, e);
+                this.sendResponseStatus(pullError);
+            }
+
+        }
         //NO other actions possible.
-
-        //send on "Send"; pull from Drive every time entered; "Refresh" button
-        //Check first on local file.
-        //CSV format
-        //updateRecord()
-        // -Pull data from fields, send over
-        // -No such thing as required; implement with interface/
-        // -Data record layout in CSV?
-        //
-        //pullRecord()
-        //pushRecord()
-        //Needs local copy in case offline.
-
-        //interruptedException
     }
 
     //StopService handled by IntentService
 
-    //When done with a pull, use this code to return a response.
-    /**
-     * LocalBroadcastManager.getInstance(this).sendBroadcast(new DataSyncPullCompleteIntent(...));
-     */
+    public void sendResponseStatus (Intent intent) {
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
 
 
 }

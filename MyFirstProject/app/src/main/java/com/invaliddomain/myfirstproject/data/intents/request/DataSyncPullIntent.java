@@ -3,6 +3,8 @@ package com.invaliddomain.myfirstproject.data.intents.request;
 import android.content.Context;
 import android.content.Intent;
 
+import com.invaliddomain.myfirstproject.data.DataManager.DayDate;
+
 public class DataSyncPullIntent extends Intent {
     /*
      * Per https://developer.android.com/reference/android/content/Intent:
@@ -12,7 +14,17 @@ public class DataSyncPullIntent extends Intent {
      */
     public static final String PULL = "com.invaliddomain.myfirstproject.data.PULL";
 
-    public DataSyncPullIntent(String uri, Context context, Class class){
-            super(DataSyncPullIntent.PULL, uri, context, class);
+    private DayDate whenToPullFrom;
+
+    public DataSyncPullIntent(Context context, Class clazz, DayDate when){
+            super(DataSyncPullIntent.PULL);
+            this.setClass(context, clazz);
+            whenToPullFrom = when;
     }
+
+    public DayDate getWhenToPullFrom()
+    {
+        return whenToPullFrom;
+    }
+
 }

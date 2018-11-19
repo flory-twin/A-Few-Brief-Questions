@@ -47,11 +47,6 @@ public class DayDate {
 
     public String toString()
     {
-        String year = year.toString();
-        String month = "";
-        switch monthOfYear
-        {
-            case
-        }
+        return Integer.toString(year) + "-" + Integer.toString(monthOfYear) + "-" + Integer.toString(dayOfMonth);
     }
 }

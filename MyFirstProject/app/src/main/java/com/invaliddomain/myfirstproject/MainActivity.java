@@ -1,7 +1,11 @@
 package com.invaliddomain.myfirstproject;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.provider.SyncStateContract;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -10,8 +14,10 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.invaliddomain.myfirstproject.data.DataSyncService;
 import com.invaliddomain.myfirstproject.data.DataSyncServiceReceiver;
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
+import com.invaliddomain.myfirstproject.data.intents.request.DataSyncPushIntent;
 import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPullCompleteIntent;
 import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPullErrorIntent;
 import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPushCompleteIntent;
@@ -26,12 +32,15 @@ import com.invaliddomain.myfirstproject.questions.base.Question;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements PullCompleteListener, PushCompleteListener, PullErrorListener, PushErrorListener {
+public class MainActivity extends AppCompatActivity{
 
     public static final String message = "This is a message.";
 
     private InMemoryDataRecord questionRecords;
     private ArrayList<DateTimeQuestionLayout> dtQuestionViews;
+    private DataSyncService sync;
+    private boolean syncServiceIsBound;
+    private PushCompleteListener pushCompleteListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +48,20 @@ public class MainActivity extends AppCompatActivity implements PullCompleteListe
         //this.setContentView(dtqv.getQuestionAnswerLayout());
         this.setContentView(R.layout.activity_main);
 
-
-
+        this.setUpService();
 
         this.dtQuestionViews = new ArrayList<DateTimeQuestionLayout>();
         this.setUpQuestions();
         this.addChildElements();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (syncServiceIsBound) {
+            unbindService(sync);
+        }
+        syncServiceIsBound = false;
     }
 
 
@@ -57,6 +74,12 @@ public class MainActivity extends AppCompatActivity implements PullCompleteListe
         int margin = 10;
         DateTimeQuestionLayout lastView = null;
         for (Question q: questions) {
+            q.addListener(new Question.AnswerUpdateListener() {
+                @Override
+                public void onAnswerUpdated() {
+                    Intent i= new Intent(DataSyncPushIntent.PUSH, this.getApplicationContext(), DataSyncService.class);
+                }
+            });
             if (q.getClass().getSimpleName().equals("DateTimeQuestion"))
             {
                 DateTimeQuestionLayout qView = new DateTimeQuestionLayout(
@@ -71,6 +94,13 @@ public class MainActivity extends AppCompatActivity implements PullCompleteListe
         root.invalidate();
     }
 
+    private void bindAndPush(DataSyncPushIntent pi) {
+        if (!this.syncServiceIsBound) {
+            bindService(pi, this.sync, Context.BIND_AUTO_CREATE);
+        }
+        this.sync.push(pi.getRecord());
+
+    }
             /*
     // use this to start and trigger a service
 Intent i= new Intent(DataSyncIntent.PULL, "", this.getApplicationContext(), DataSyncService.class);
@@ -95,15 +125,23 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
 
     private void setUpService()
     {
-        IntentFilter pullCompleteFilter = new IntentFilter((
+        pushCompleteListener = new PushCompleteListener() {
+            @Override
+            public void onPushComplete() {
+                //No action needed.
+            }
+        };
+
+        /*
+        IntentFilter pullCompleteFilter = new IntentFilter(
                 DataSyncPullCompleteIntent.PULL_COMPLETE_RESPONSE);
-        IntentFilter pullErrorFilter = new IntentFilter((
+        IntentFilter pullErrorFilter = new IntentFilter(
                 DataSyncPullErrorIntent.PULL_ERROR_RESPONSE);
-        IntentFilter pushCompleteFilter = new IntentFilter((
+        IntentFilter pushCompleteFilter = new IntentFilter(
                 DataSyncPushCompleteIntent.PUSH_COMPLETE_RESPONSE);
-        IntentFilter pushErrorFilter = new IntentFilter((
+        IntentFilter pushErrorFilter = new IntentFilter(
                 DataSyncPushErrorIntent.PUSH_ERROR_RESPONSE);
-        r
+
         DataSyncServiceReceiver receiver =
                 new DataSyncServiceReceiver(
                         new PullCompleteListener() {
@@ -115,7 +153,7 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
                         new PullErrorListener() {
                             @Override
                             public void onPullError(Exception e) {
-                                return null;
+
                             }
                         },
                         new PushCompleteListener() {
@@ -146,7 +184,27 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
         broadcastReceiver.registerReceiver(
                 receiver,
                 pushErrorFilter);
+        */
+        // Initialize the service.
+        sync = new DataSyncService();
+        syncServiceIsBound = false;
     }
 
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder serviceBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            DataSyncService.DataSyncBinder binder = (DataSyncService.DataSyncBinder) serviceBinder;
+            sync = binder.getService();
+            syncServiceIsBound = true;
+        }
 
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            syncServiceIsBound = false;
+        }
+    };
 }

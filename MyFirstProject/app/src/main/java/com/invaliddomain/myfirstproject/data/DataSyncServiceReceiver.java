@@ -15,7 +15,8 @@ import com.invaliddomain.myfirstproject.data.listeners.PushErrorListener;
 
 import java.util.ArrayList;
 
-public class DataSyncServiceReceiver extends BroadcastReceiver {
+//public class DataSyncServiceReceiver extends BroadcastReceiver {
+public class DataSyncServiceListeners{
     private ArrayList<PushCompleteListener> pushCompletionListeners;
     private ArrayList<PullCompleteListener> pullCompletionListeners;
     private ArrayList<PushErrorListener> pushErrorListeners;
@@ -31,7 +32,7 @@ public class DataSyncServiceReceiver extends BroadcastReceiver {
      * @param pushCompletionListener
      * @param pushErrorListener
      */
-    public DataSyncResponseReceiver(
+    public DataSyncServiceReceiver(
             PullCompleteListener pullCompletionListener,
             PullErrorListener pullErrorListener,
             PushCompleteListener pushCompletionListener,
@@ -57,7 +58,7 @@ public class DataSyncServiceReceiver extends BroadcastReceiver {
         }
         else if (responseIntent.getClass().equals(DataSyncPullErrorIntent.class))
         {
-            this.notifyPullErrorListeners(((DataSyncPullErrorIntent) responseIntent).getException(););
+            this.notifyPullErrorListeners(((DataSyncPullErrorIntent) responseIntent).getException());
         }
         else if (responseIntent.getClass().equals(DataSyncPushCompleteIntent.class))
         {
@@ -65,7 +66,7 @@ public class DataSyncServiceReceiver extends BroadcastReceiver {
         }
         else if (responseIntent.getClass().equals(DataSyncPushErrorIntent.class))
         {
-            this.notifyPushErrorListeners(((DataSyncPushErrorIntent) responseIntent).getException(););
+            this.notifyPushErrorListeners(((DataSyncPushErrorIntent) responseIntent).getException());
         }
     }
 
@@ -101,21 +102,21 @@ public class DataSyncServiceReceiver extends BroadcastReceiver {
     {
         for (PullCompleteListener listener: pullCompletionListeners)
         {
-            listener.onPullComplete();
+            listener.onPullComplete(pulledRecord);
         }
     }
     private void notifyPushErrorListeners(Exception e)
     {
         for (PushErrorListener listener: pushErrorListeners)
         {
-            listener.onPushError();
+            listener.onPushError(e);
         }
     }
     private void notifyPullErrorListeners(Exception e)
     {
         for (PullErrorListener listener: pullErrorListeners)
         {
-            listener.onPullError();
+            listener.onPullError(e);
         }
     }
 }

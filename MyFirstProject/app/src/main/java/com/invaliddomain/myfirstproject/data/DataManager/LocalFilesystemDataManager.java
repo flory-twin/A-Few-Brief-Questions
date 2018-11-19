@@ -26,12 +26,27 @@ public class LocalFilesystemDataManager implements IDataManager {
 
     public LocalFilesystemDataManager()
     {
-        records = new HashMap<Date, InMemoryDataRecord>();
+        records = new HashMap<DayDate, InMemoryDataRecord>();
         dataFile = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS), filename);
         this.deserialize("2018-11-15 20:52:00");
         int d = 0;
     }
+
+
+    //send on "Send"; pull from Drive every time entered; "Refresh" button
+    //Check first on local file.
+    //CSV format
+    //updateRecord()
+    // -Pull data from fields, send over
+    // -No such thing as required; implement with interface/
+    // -Data record layout in CSV?
+    //
+    //pullRecord()
+    //pushRecord()
+    //Needs local copy in case offline.
+
+    //interruptedException
 
     @Override
     public InMemoryDataRecord getCachedRecord(DayDate fromThisDate) throws Exception{
@@ -41,7 +56,7 @@ public class LocalFilesystemDataManager implements IDataManager {
         }
         else
         {
-            throw new Exception("The record for " + );
+            throw new Exception("The record for " + fromThisDate.toString() + " is not in the cache.");
         }
     }
     //public void pushAllRecords(InMemoryDataRecord record);
@@ -62,8 +77,15 @@ public class LocalFilesystemDataManager implements IDataManager {
     public void addToOrUpdateCache(InMemoryDataRecord recordToAddOrUpdate)
     {
         //If no record already exists for this date, add it.
-        if (!this.records.containsKey(recordToAddOrUpdate.get))
+        if (!this.records.containsKey(recordToAddOrUpdate.getRecordDate()))
+        {
+
+        }
         //Otherwise, update.
+        else
+        {
+
+        }
     }
 
     @Override

@@ -10,8 +10,9 @@ public class DataSyncPullCompleteIntent extends Intent {
 
     private InMemoryDataRecord returnedRecord;
 
-    public DataSyncPullCompleteIntent(String uri, Context context, Class class, InMemoryDataRecord pulledRecord){
-        super(DataSyncPullCompleteIntent.PUSH, uri, context, class);
+    public DataSyncPullCompleteIntent(Context context, Class clazz, InMemoryDataRecord pulledRecord){
+        super(DataSyncPullCompleteIntent.PULL_COMPLETE_RESPONSE);
+        this.setClass(context, clazz);
         this.returnedRecord = pulledRecord;
     }
 

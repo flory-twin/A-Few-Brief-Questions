@@ -14,18 +14,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <service
-                android:name=".com.invaliddomain.myfirstproject.data.DataSyncService"
-                android:exported="false">
-                <!-- No intent filter is needed if the caller provides explicit intents.
-                <intent-filter>
-                    <action android:name="com.invaliddomain.myfirstproject.data.PUSH" />
-                    <action android:name="com.invaliddomain.myfirstproject.data.PULL" />
-                    <category android:name="android.intent.category.DEFAULT" />
-                </intent-filter> -->
-            </service>
         </activity>
-
+        <service
+            android:name=".com.invaliddomain.myfirstproject.data.DataSyncService"
+            android:exported="false">
+            <!-- No intent filter is needed if the caller provides explicit intents.
+            <intent-filter>
+                <action android:name="com.invaliddomain.myfirstproject.data.PUSH" />
+                <action android:name="com.invaliddomain.myfirstproject.data.PULL" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter> -->
+        </service>
     </application>
 
 </manifest>

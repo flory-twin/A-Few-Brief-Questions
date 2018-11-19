@@ -1,4 +1,5 @@
 package com.invaliddomain.myfirstproject.data;
+import com.invaliddomain.myfirstproject.data.DataManager.DayDate;
 import com.invaliddomain.myfirstproject.questions.DateTimeQuestion;
 import com.invaliddomain.myfirstproject.questions.base.Question;
 
@@ -8,14 +9,14 @@ import java.util.HashMap;
 
 public class InMemoryDataRecord {
     private HashMap<String, Question> questions;
-    private Date recordDate;
+    private DayDate recordDate;
 
     public InMemoryDataRecord()
     {
-        this(new Date());
+        this(new DayDate(new Date()));
     }
 
-    public InMemoryDataRecord(Date existingDate)
+    public InMemoryDataRecord(DayDate existingDate)
     {
         //This is the master spot which controls which questions appear on the screen and in the results file.
         questions = new HashMap<String, Question>();
@@ -64,7 +65,7 @@ public class InMemoryDataRecord {
         return returnList;
     }
 
-    public Date getRecordDate()
+    public DayDate getRecordDate()
     {
         return recordDate;
     }

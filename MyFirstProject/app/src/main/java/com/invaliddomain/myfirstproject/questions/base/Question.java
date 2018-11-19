@@ -1,5 +1,7 @@
 package com.invaliddomain.myfirstproject.questions.base;
 
+import java.util.ArrayList;
+
 public class Question {
     public interface AnswerUpdateListener {
         // These methods are the different events and
@@ -8,7 +10,7 @@ public class Question {
     }
     protected String questionAsText;
     protected String answerAsText;
-    private AnswerUpdateListener listener;
+    protected ArrayList<AnswerUpdateListener> listeners = new ArrayList<AnswerUpdateListener>();
 
     public String getQuestionAsText()
     {
@@ -30,15 +32,20 @@ public class Question {
         // 1. this is not the initialization phase for the answer, and
         // 2. the new answer differs from the old one.
         if (oldAnswer != null && !newAnswer.equals(oldAnswer)) {
-            this.triggerListener();
+            this.notifyListeners();
         }
     }
-    public void setListener(AnswerUpdateListener newListener)
+
+    public void addListener(AnswerUpdateListener l)
     {
-        listener = newListener;
+        listeners.add(l);
     }
-    private void triggerListener()
+
+    protected void notifyListeners()
     {
-        listener.onAnswerUpdated();
+        for (AnswerUpdateListener l: listeners)
+        {
+            l.onAnswerUpdated();
+        }
     }
 }
