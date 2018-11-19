@@ -48,6 +48,21 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         this.dtQuestion = new DateTimeQuestion(questionText);
         this.initalizeConstraintLayout();
     }
+    public DateTimeQuestionLayout(Context context, DateTimeQuestion q)
+    {
+        super(context, null);
+        this.context = context;
+
+        //Later, may want to override with hashcode of question text for easier ID'ing.
+        this.setId(View.generateViewId());
+
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.date_time_question_layout, this, true);
+
+        this.dtQuestion = q;
+        this.initalizeConstraintLayout();
+    }
     public DateTimeQuestionLayout(Context context, AttributeSet attrSet) {
         super(context, attrSet);
         this.context = context;
