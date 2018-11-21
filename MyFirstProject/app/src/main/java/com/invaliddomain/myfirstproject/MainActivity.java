@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity{
         //this.setContentView(dtqv.getQuestionAnswerLayout());
         this.setContentView(R.layout.activity_main);
 
-        this.requestExternalFilesystemWritePermission();
+        //this.requestExternalFilesystemWritePermission();
         this.setUpService();
 
         this.dtQuestionViews = new ArrayList<DateTimeQuestionLayout>();
