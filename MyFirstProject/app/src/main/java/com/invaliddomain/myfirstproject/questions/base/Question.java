@@ -8,10 +8,25 @@ public class Question {
         // need to pass relevant arguments related to the event triggered
         public void onAnswerUpdated();
     }
+    protected int uuid;
     protected String questionAsText;
     protected String answerAsText;
     protected ArrayList<AnswerUpdateListener> listeners = new ArrayList<AnswerUpdateListener>();
 
+    public Question(String question)
+    {
+        questionAsText = question;
+        answerAsText = "    -  -     :  :  ";
+        uuid = -1;
+    }
+
+    public Question(String question, String answer, int uuid)
+    {
+        questionAsText = question;
+        answerAsText = answer;
+        this.uuid = uuid;
+    }
+    public int getUuid() { return uuid; }
     public String getQuestionAsText()
     {
         return questionAsText;

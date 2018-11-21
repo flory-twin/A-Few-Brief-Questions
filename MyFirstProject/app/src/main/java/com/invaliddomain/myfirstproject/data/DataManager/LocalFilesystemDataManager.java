@@ -1,36 +1,35 @@
 package com.invaliddomain.myfirstproject.data.DataManager;
 
+import android.app.Activity;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.util.Log;
-
+import com.invaliddomain.myfirstproject.data.InMemoryDataRecordList;
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
-import com.invaliddomain.myfirstproject.data.QuestionsTemplate;
-import com.invaliddomain.myfirstproject.questions.DateTimeQuestion;
-
 import java.io.BufferedReader;
-
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 
 public class LocalFilesystemDataManager implements IDataManager {
-    private static String filename = "RedLightData.csv";
+    private static String filename;
+    private static File directory;
+    static {
+        filename = "RedLightData.csv";
+        directory = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS);
+    }
     //The complete Java.nio is not included in v.25--just 26 and up.
     // So, in with the old, out with the new!
     private File dataFile;
-    private HashMap<DayDate, InMemoryDataRecord> records;
+    private InMemoryDataRecordList records;
+    //Necessary for checking our write permissions.
+    private Activity activity;
 
     public LocalFilesystemDataManager()
     {
-        records = new HashMap<DayDate, InMemoryDataRecord>();
-        dataFile = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS), filename);
-        this.deserialize("2018-11-15 20:52:00");
-        int d = 0;
+        records = new InMemoryDataRecordList();
+        dataFile = new File(directory, filename);
     }
 
 
@@ -50,7 +49,7 @@ public class LocalFilesystemDataManager implements IDataManager {
 
     @Override
     public InMemoryDataRecord getCachedRecord(DayDate fromThisDate) throws Exception{
-        if (records.containsKey(fromThisDate))
+        if (records.contains(fromThisDate))
         {
             return records.get(fromThisDate);
         }
@@ -65,108 +64,134 @@ public class LocalFilesystemDataManager implements IDataManager {
     @Override
     public ArrayList<InMemoryDataRecord> getAllCachedRecords()
     {
-        ArrayList<InMemoryDataRecord> cachedRecords = new ArrayList<InMemoryDataRecord>();
-        for (Object key: this.records.keySet())
-        {
-            cachedRecords.add(records.get(key));
-        }
-        return cachedRecords;
+        return records.getRecords();
     }
 
     @Override
     public void addToOrUpdateCache(InMemoryDataRecord recordToAddOrUpdate)
     {
-        //If no record already exists for this date, add it.
-        if (!this.records.containsKey(recordToAddOrUpdate.getRecordDate()))
-        {
-
-        }
-        //Otherwise, update.
+        //If addition fails because a record is already present...
+        if (!records.add(recordToAddOrUpdate))
+        {}
+        //...update.
         else
         {
-
+            records.remove(recordToAddOrUpdate.getRecordDate());
+            records.add(recordToAddOrUpdate);
         }
     }
 
     @Override
     public void pullAllRecords() throws Exception
     {
-        this.checkFileWritableAndThrow();
+        checkFileReadableAndThrow();
         //If permissions check out, then pull the file contents, deserialize, and write to memory.
         //FileReader, FileWriter
+        String line = "";
         BufferedReader br = new BufferedReader(new FileReader(dataFile));
-        br.readLine();
+        while ((line = br.readLine()) != null)
+        {
+            records.add(new InMemoryDataRecord(line));
+        }
+
+
+        //...........................
 
     }
 
     @Override
     public void pushAllRecords() throws Exception{
-        //Create CSV line to print
-        //If it does not already exist, create the file to which to write.
-        this.getPublicFile();
-        //Write the data:
-        //First, see if there's already a record date-stamped for today.
-        //If so, write to that column.  If not, create a column.
-    }
+        ArrayList<String> allRecordsAsCsv = new ArrayList<String>();
 
-    private InMemoryDataRecord deserialize(String record)
-    {
-        String[] fields = record.split(",");
-        //Assume that the data from the record is in the order given by the standard question template.
-        //Assume that this is not a header row.
-        //Set up the record using the first timed question known to contain today's date.
-        //temporary override
-        InMemoryDataRecord testRecord = new InMemoryDataRecord();
-        //Testing.  Will this change be persistent?
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e)
-        {
+        //If it does not already exist, create the file to which to write.  Then prepare to write.
+        prepareFileForWritingOrThrow();
+        BufferedWriter bw = new BufferedWriter(new FileWriter(dataFile));
 
+        for (InMemoryDataRecord dr: this.records.getRecords()) {
+            bw.write(dr.serialize());
+            bw.newLine();
         }
-        ((DateTimeQuestion) testRecord.getQuestions().get(0)).setAnswerToNow();
-        int c = 0;
-        return testRecord;
+        bw.flush();
+        bw.close();
     }
-    private Boolean doesRecordExistInCache(Date recordDate)
+
+    /*
+     * --------------------------------------------------------------------------------
+     * String methods.
+     * --------------------------------------------------------------------------------
+     */
+
+    private Boolean doesRecordExistInCache(DayDate recordDate)
     {
         return false;
     }
 
-    private void checkFileAndThrow() throws Exception, FileNotFoundException
-    {
-        if (!isExternalStorageWritable())
-        {
+    /*
+     * --------------------------------------------------------------------------------
+     * Granular error conditions.
+     * --------------------------------------------------------------------------------
+     */
+
+    private boolean checkExternalStorageReadableAndThrow() throws Exception{
+        String state = Environment.getExternalStorageState();
+        if (!(Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))) {
             throw new Exception(
-                    "The shared drive area " +
-                            Environment.DIRECTORY_DOCUMENTS +
-                            " is not available.");
+                    "The drive media could not be mounted normally or as read-only.");
         }
-        else if (!dataFile.exists())
-        {
-            //Try and create the file first.  If that fails, throw an exception.
-            try {
-                dataFile.createNewFile();
-            }
-            catch (Exception e) {
-                throw new java.io.FileNotFoundException(
-                        "File " +
-                                dataFile.getCanonicalPath() +
-                                " does not exist and could not be created.  Creation exception was " +
-                                e.getMessage());
-            }
-        }
-        else if (!dataFile.isFile())
-        {
-            throw new Exception(
-                    dataFile.getCanonicalPath() +
-                            " is not a file.");
-        }
+        //else
+        return true;
     }
 
-    private void checkFileWritableAndThrow() throws Exception, FileNotFoundException
+    private boolean checkExternalStorageWritableAndThrow() throws Exception{
+        String state = Environment.getExternalStorageState();
+        if (!(Environment.MEDIA_MOUNTED.equals(state))) {
+            throw new Exception(
+                    "The drive media could not be mounted.");
+        }
+        //else
+        return true;
+    }
+
+    private boolean checkDirectoryExistsAndThrow() throws Exception
     {
-        checkFileAndThrow();
+        if (! directory.exists()) {
+            throw new Exception(
+                    "Directory " +
+                    directory.getCanonicalPath() +
+                    " does not exist.");
+        }
+        //else
+        return true;
+    }
+    private boolean checkFileExistsAndThrow() throws Exception{
+        if (!dataFile.exists())
+        {
+            throw new Exception(
+                    "File " +
+                    dataFile.getCanonicalPath() +
+                    " does not exist.");
+        }
+        //else
+        return true;
+    }
+
+
+    private boolean checkFileReadableAndThrow() throws Exception
+    {
+        if (!dataFile.canRead())
+        {
+            throw new Exception(
+                    "File " +
+                            dataFile.getCanonicalPath() +
+                            " cannot be read due to permissions issues.");
+        }
+        //else
+        return true;
+    }
+
+    private boolean checkFileWritableAndThrow() throws Exception
+    {
         if (!dataFile.canWrite())
         {
             throw new Exception(
@@ -174,32 +199,47 @@ public class LocalFilesystemDataManager implements IDataManager {
                             dataFile.getCanonicalPath() +
                             " cannot be written due to permissions issues.");
         }
+        //else
+        return true;
     }
 
-    private void writeNewRecord()
+    /*
+     * --------------------------------------------------------------------------------
+     * Methods built on error conditions.
+     * --------------------------------------------------------------------------------
+     */
+    private boolean prepareFileForWritingOrThrow() throws Exception
     {
+        if (checkExternalStorageReadableAndThrow() &&
+                checkExternalStorageWritableAndThrow())
+        {
+            try{
+                checkDirectoryExistsAndThrow();
+            }
+            catch (Exception e)
+            {
+                directory.mkdirs();
+            }
 
-    }
+            try{
+                checkFileExistsAndThrow();
+            }
+            catch (Exception e)
+            {
+                dataFile.createNewFile();
+            }
 
-    /* Checks if external storage is available for read and write */
-    public static boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
+            try
+            {
+                checkFileWritableAndThrow();
+            }
+            catch (Exception e)
+            {
+                dataFile.setWritable(true);
+            }
         }
-        return false;
-    }
 
-    /* Checks if external storage is available to at least read */
-    public static boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
-        }
-        return false;
-    }
-
-    public void getPublicFile() {
+        //If we're here, there are no remaining errors.
+        return true;
     }
 }

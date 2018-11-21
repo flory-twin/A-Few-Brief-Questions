@@ -11,9 +11,16 @@ public class DateTimeQuestion extends Question {
 
     public DateTimeQuestion(String questionText)
     {
+        super(questionText);
+        answerAsDate = null;
+    }
 
-        questionAsText = questionText;
-        answerAsText = "    -  -     :  :  ";
+    public DateTimeQuestion(String questionText, Date answer, int uuid)
+    {
+        super(questionText,
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(answer),
+                uuid);
+        answerAsDate = answer;
     }
 
     public Date getAnswerAsDate()
@@ -23,22 +30,21 @@ public class DateTimeQuestion extends Question {
 
     public void setAnswerToNow()
     {
-        answerAsDate = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        answerAsText = format.format(answerAsDate);
+        this.setAnswerAsDate(new Date());
     }
 
     public void setAnswerAsDate(Date date)
     {
         answerAsDate = date;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        //Note: This has to be super--otherwise the change listeners won't fire.
+        super.setAnswerAsText(format.format(answerAsDate));
     }
 
     public void setAnswer(int year, int month, int day, int hours24, int minutes, int seconds)
     {
         GregorianCalendar cal = new GregorianCalendar();
         cal.set(year + 1900, month, day, hours24, minutes, seconds);
-        answerAsDate = new Date(cal.getTimeInMillis());
-        SimpleDateFormat format = new SimpleDateFormat("uuuu-MM-dd HH:mm:ss");
-        answerAsText = format.format(answerAsDate);
+        this.setAnswerAsDate(new Date(cal.getTimeInMillis()));
     }
 }
