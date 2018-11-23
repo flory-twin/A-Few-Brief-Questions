@@ -16,6 +16,7 @@ public class InMemoryDataRecordList  {
         public InMemoryDataRecord record;
         public InMemoryDataRecordListEntry(DayDate dateKey, InMemoryDataRecord dateRecord)
         {
+            //Used for ordering and keying.
             recordDate = dateKey;
             record = dateRecord;
         }

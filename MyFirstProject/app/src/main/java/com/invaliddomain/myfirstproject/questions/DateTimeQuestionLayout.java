@@ -27,7 +27,6 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     // Question text, wrapped to screen width
     //Button "Now", DT box which allows entry
     public DateTimeQuestion dtQuestion;
-    private Context context;
     private TextView questionLabel;
     private Button nowButton;
     private EditText dtLabel;
@@ -36,7 +35,6 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     public DateTimeQuestionLayout(Context context, String questionText)
     {
         super(context, null);
-        this.context = context;
 
         //Later, may want to override with hashcode of question text for easier ID'ing.
         this.setId(View.generateViewId());
@@ -51,7 +49,6 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     public DateTimeQuestionLayout(Context context, DateTimeQuestion q)
     {
         super(context, null);
-        this.context = context;
 
         //Later, may want to override with hashcode of question text for easier ID'ing.
         this.setId(View.generateViewId());
@@ -65,7 +62,6 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     }
     public DateTimeQuestionLayout(Context context, AttributeSet attrSet) {
         super(context, attrSet);
-        this.context = context;
 
         this.setId(View.generateViewId());
 
@@ -106,6 +102,7 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         this.initializeConstraints();
         this.repaint();
     }
+
     /*
      * --------------------------------------------------
      * Main sub-view initializers.
@@ -117,13 +114,6 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         questionLabel.setId(View.generateViewId());
         questionLabel.setText(this.dtQuestion.getQuestionAsText());
     }
-    private void initializeNowButton()
-    {
-        nowButton = (Button) this.getChildAt(1);
-        nowButton.setId(View.generateViewId());
-        nowButton.setText(R.string.now);
-        this.initializeNowButtonLogic();
-    }
     private void initializeTimeDisplay()
     {
         dtLabel = (EditText) this.getChildAt(2);
@@ -131,6 +121,14 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         dtLabel.setText(this.dtQuestion.getAnswerAsText());
         initializeDateTimeOnClickListener();
     }
+    private void initializeNowButton()
+    {
+        nowButton = (Button) this.getChildAt(1);
+        nowButton.setId(View.generateViewId());
+        nowButton.setText(R.string.now);
+        this.initializeNowButtonLogic();
+    }
+
     /*
      * --------------------------------------------------
      * Helpers.
@@ -180,12 +178,37 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     private void initializeDateTimeOnClickListener() {
         final TimePickerDialog.OnTimeSetListener setListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            public void onTimeSet(TimePicker view, final int hourOfDay, final int minute) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(DateTimeQuestionLayout.super.getContext());
                 builder.setMessage(R.string.confirmDateTimeUpdateMessage)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                dtQuestion.setAnswerToNow();
+                                Date oldDateStamp = dtQuestion.getAnswerAsDate();
+                                //If the date's already been set,
+                                if (oldDateStamp != null) {
+                                    //Use the old date and the selected time.
+                                    dtQuestion.setAnswer(
+                                            oldDateStamp.getYear(),
+                                            oldDateStamp.getMonth(),
+                                            oldDateStamp.getDay(),
+                                            hourOfDay,
+                                            minute,
+                                            0
+                                    );
+                                }
+                                else
+                                {
+                                    Date now = new Date();
+                                    //Use the current date and the selected time.
+                                    dtQuestion.setAnswer(
+                                            now.getYear(),
+                                            now.getMonth(),
+                                            now.getDay(),
+                                            hourOfDay,
+                                            minute,
+                                            0
+                                    );
+                                }
                                 repaintDTLabel();
                                 dialog.dismiss();
                             }
@@ -211,11 +234,12 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
                         new Date().getMinutes() :
                         dtQuestion.getAnswerAsDate().getMinutes());
 
+        final Context superContext = this.getContext();
         OnClickListener dateTimeOnClickListener = new OnClickListener() {
             @Override
             public void onClick(View v) {
                 TimePickerDialog timeDialog = new TimePickerDialog(
-                        context,
+                        superContext,
                         setListener,
                         hours,
                         minutes,

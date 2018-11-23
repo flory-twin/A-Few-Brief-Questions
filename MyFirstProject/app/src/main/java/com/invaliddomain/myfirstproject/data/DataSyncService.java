@@ -3,6 +3,7 @@ package com.invaliddomain.myfirstproject.data;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.IntentService;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -65,15 +66,15 @@ public class DataSyncService extends IntentService {
      * Constructors.
      * --------------------------------------------------------------------------------
      */
-    public DataSyncService()
+    public DataSyncService(Context context)
     {
         super("DataSyncService");
         this.dataStore = new LocalFilesystemDataManager();
 
         this.pushCompletionListeners = new ArrayList<PushCompleteListener>();
-        this.pushErrorListeners = new ArrayList<PushErrorListener>();
         this.pullCompletionListeners = new ArrayList<PullCompleteListener>();
         this.pushErrorListeners = new ArrayList<PushErrorListener>();
+        this.pullErrorListeners = new ArrayList<PullErrorListener>();
     }
 
     /*
@@ -88,7 +89,7 @@ public class DataSyncService extends IntentService {
 
     @Override
     public IBinder onBind(Intent intent) {
-            return this.serviceBinding;
+        return this.serviceBinding;
     }
 
     public void push(InMemoryDataRecord recordToPush)
@@ -141,14 +142,17 @@ public class DataSyncService extends IntentService {
     {
         pushCompletionListeners.add(listener);
     }
+
     public void addPullCompleteListener(PullCompleteListener listener)
     {
         pullCompletionListeners.add(listener);
     }
+
     public void addPushErrorListener(PushErrorListener listener)
     {
         pushErrorListeners.add(listener);
     }
+
     public void addPullErrorListener(PullErrorListener listener)
     {
         pullErrorListeners.add(listener);

@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity{
             if (q.getClass().getSimpleName().equals("DateTimeQuestion"))
             {
                 DateTimeQuestionLayout qView = new DateTimeQuestionLayout(
-                        this.getApplicationContext(),
+                        this,
                         (DateTimeQuestion) q);
                 this.dtQuestionViews.add(qView);
                 root.addView(qView, new ViewGroup.LayoutParams(
@@ -153,7 +153,7 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
     private void setUpService()
     {
         // Initialize the service.
-        syncService = new DataSyncService();
+        syncService = new DataSyncService(this.getApplicationContext());
         Intent startIntent = new Intent(MainActivity.STARTSERVICE);
         startIntent.setClass(this.getApplicationContext(), DataSyncService.class);
         this.getApplicationContext().bindService(

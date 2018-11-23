@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 public class LocalFilesystemDataManager implements IDataManager {
     private static String filename;
+    // /storage/emulated/0/Documents in emulated device.
     private static File directory;
     static {
         filename = "RedLightData.csv";
