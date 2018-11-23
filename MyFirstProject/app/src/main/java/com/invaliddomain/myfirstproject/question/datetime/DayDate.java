@@ -2,7 +2,9 @@ package com.invaliddomain.myfirstproject.question.datetime;
 
 import android.support.annotation.NonNull;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * This trivial helper class allows me to easily use only day-level date information.
@@ -20,7 +22,7 @@ public class DayDate implements Comparable<DayDate>{
     }
     public DayDate(Date date)
     {
-        this(date.getYear(), date.getMonth(), date.getDay());
+        this(date.getYear() + 1900, date.getMonth() + 1, date.getDate());
     }
     public void setYear(int yearToSet)
     {
@@ -49,7 +51,9 @@ public class DayDate implements Comparable<DayDate>{
 
     public String toString()
     {
-        return Integer.toString(year) + "-" + Integer.toString(monthOfYear) + "-" + Integer.toString(dayOfMonth);
+        return String.format("%04d", year) + "-" +
+               String.format("%02d", monthOfYear) + "-" +
+               String.format("%02d", dayOfMonth);
     }
 
     @Override

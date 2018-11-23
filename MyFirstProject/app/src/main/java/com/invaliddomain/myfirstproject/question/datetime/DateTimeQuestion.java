@@ -23,9 +23,39 @@ public class DateTimeQuestion extends Question {
         answerAsDate = answer;
     }
 
+    /**
+     *
+     * @return The stored date, which may be null if the answer has not been set.
+     */
     public Date getAnswerAsDate()
     {
         return answerAsDate;
+    }
+
+    public String getTimePartOfAnswerAsString()
+    {
+        String timePartAsString = "";
+        if (answerAsDate != null) {
+            timePartAsString = new TimePartOfDate(answerAsDate).toString();
+        }
+        else
+        {
+            timePartAsString = "  :  ";
+        }
+        return timePartAsString;
+    }
+
+    public String getDatePartOfAnswerAsString()
+    {
+        String datePartAsString = "";
+        if (answerAsDate != null) {
+            datePartAsString = new DayDate(answerAsDate).toString();
+        }
+        else
+        {
+            datePartAsString = "    -  -  ";
+        }
+        return datePartAsString;
     }
 
     public void setAnswerToNow()

@@ -9,4 +9,5 @@
     <color name="redShade">#ff1515</color>
     <color name="blueShade">#364df7</color>
     <color name="greyShade">#626262</color>
+    <color name="textBoxBackground">#dadede</color>
 </resources>

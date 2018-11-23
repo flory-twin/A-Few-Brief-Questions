@@ -1,16 +1,19 @@
 package com.invaliddomain.myfirstproject.layout;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -29,23 +32,18 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     public DateTimeQuestion dtQuestion;
     private TextView questionLabel;
     private Button nowButton;
-    private EditText dtLabel;
+    private EditText dateLabel;
+    private EditText timeLabel;
     private AlertDialog confirmationDialogue;
 
+    /*
+     * -------------------------------------------------------------------------
+     */
     public DateTimeQuestionLayout(Context context, String questionText)
     {
-        super(context, null);
-
-        //Later, may want to override with hashcode of question text for easier ID'ing.
-        this.setId(View.generateViewId());
-
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.date_time_question_layout, this, true);
-
-        this.dtQuestion = new DateTimeQuestion(questionText);
-        this.initalizeConstraintLayout();
+        this(context, new DateTimeQuestion(questionText));
     }
+
     public DateTimeQuestionLayout(Context context, DateTimeQuestion q)
     {
         super(context, null);
@@ -58,8 +56,9 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         inflater.inflate(R.layout.date_time_question_layout, this, true);
 
         this.dtQuestion = q;
-        this.initalizeConstraintLayout();
+        this.doLayout();
     }
+
     public DateTimeQuestionLayout(Context context, AttributeSet attrSet) {
         super(context, attrSet);
 
@@ -76,18 +75,26 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         a.recycle();
 
         this.dtQuestion = new DateTimeQuestion(questionText);
-        this.initalizeConstraintLayout();
+        this.doLayout();
     }
-    
+
+    /*
+     * -------------------------------------------------------------------------
+     */
+
     /**
-     * Any layout manager that doesn't scroll will want this.
+     * Per Android official documentation, "Any layout manager that doesn't scroll will want this."
      */
     @Override
     public boolean shouldDelayChildPressedState() {
         return false;
     }
 
-    private void initalizeConstraintLayout()
+    /*
+     * -------------------------------------------------------------------------
+     */
+
+    private void doLayout()
     {
         //Set up question text.
         this.initializeQuestionLabel();
@@ -95,6 +102,8 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         //Set up "Now" button.
         this.initializeNowButton();
 
+        //Add date label.
+        this.initializeDateDisplay();
         //Add time label.
         this.initializeTimeDisplay();
 
@@ -114,12 +123,27 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         questionLabel.setId(View.generateViewId());
         questionLabel.setText(this.dtQuestion.getQuestionAsText());
     }
+    private void initializeDateDisplay()
+    {
+        dateLabel = (EditText) this.getChildAt(2);
+        dateLabel.setId(View.generateViewId());
+        dateLabel.setText(dtQuestion.getDatePartOfAnswerAsString());
+        dateLabel.setBackgroundColor(
+                ContextCompat.getColor(
+                        this.getContext(),
+                        R.color.textBoxBackground));
+        initializeDateOnClickListener();
+    }
     private void initializeTimeDisplay()
     {
-        dtLabel = (EditText) this.getChildAt(2);
-        dtLabel.setId(View.generateViewId());
-        dtLabel.setText(this.dtQuestion.getAnswerAsText());
-        initializeDateTimeOnClickListener();
+        timeLabel = (EditText) this.getChildAt(3);
+        timeLabel.setId(View.generateViewId());
+        timeLabel.setText(dtQuestion.getTimePartOfAnswerAsString());
+        timeLabel.setBackgroundColor(
+                ContextCompat.getColor(
+                        this.getContext(),
+                        R.color.textBoxBackground));
+        initializeTimeOnClickListener();
     }
     private void initializeNowButton()
     {
@@ -175,7 +199,98 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         builder.show();
     }
 
-    private void initializeDateTimeOnClickListener() {
+    private void initializeDateOnClickListener() {
+        final DatePickerDialog.OnDateSetListener setListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, final int year, final int month, final int dayOfMonth) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(DateTimeQuestionLayout.super.getContext());
+                builder.setMessage(R.string.confirmDateTimeUpdateMessage)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Date oldDateStamp = dtQuestion.getAnswerAsDate();
+                                //If the time's already been set,
+                                if (oldDateStamp != null) {
+                                    //Use the old time and the selected date.
+                                    dtQuestion.setAnswer(
+                                            year - 1900,
+                                            month,
+                                            dayOfMonth,
+                                            oldDateStamp.getHours(),
+                                            oldDateStamp.getMinutes(),
+                                            oldDateStamp.getSeconds()
+                                    );
+                                }
+                                else
+                                {
+                                    Date now = new Date();
+                                    //Use the current time and the selected date.
+                                    dtQuestion.setAnswer(
+                                            year,
+                                            month,
+                                            dayOfMonth,
+                                            now.getHours(),
+                                            now.getMinutes(),
+                                            now.getSeconds()
+                                    );
+                                }
+                                repaintDTLabel();
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog; no actions.
+                                dialog.dismiss();
+                            }
+                        });
+                builder.show();
+            }
+        };
+
+        final int year = (dtQuestion == null ?
+                new Date().getYear():
+                dtQuestion.getAnswerAsDate() == null ?
+                        new Date().getYear():
+                        dtQuestion.getAnswerAsDate().getYear());
+        final int month = (dtQuestion == null ?
+                new Date().getMonth():
+                dtQuestion.getAnswerAsDate() == null ?
+                        new Date().getMonth():
+                        dtQuestion.getAnswerAsDate().getMonth());
+        final int day = (dtQuestion == null ?
+                new Date().getDay() :
+                dtQuestion.getAnswerAsDate() == null ?
+                        new Date().getDate():
+                        dtQuestion.getAnswerAsDate().getDate());
+
+        final Context superContext = this.getContext();
+        OnClickListener dateOnClickListener = new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatePickerDialog dateDialog = new DatePickerDialog(
+                        superContext,
+                        setListener,
+                        year + 1900,
+                        month,
+                        day) {
+                    public void onDateChanged(DatePicker view, final int year, final int month, final int day)
+                    {
+                        super.onDateChanged(view, year, month, day);
+                        final Date oldDate = dtQuestion.getAnswerAsDate();
+                        //Display a confirmation dialogue.
+
+                    }
+
+                };
+                //timeDialog.create();
+                dateDialog.show();
+                //timeDialog.show();
+            }
+        };
+        dateLabel.setOnClickListener(dateOnClickListener);
+    }
+
+    private void initializeTimeOnClickListener() {
         final TimePickerDialog.OnTimeSetListener setListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, final int hourOfDay, final int minute) {
@@ -261,7 +376,7 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
                 //timeDialog.show();
             }
         };
-        dtLabel.setOnClickListener(dateTimeOnClickListener);
+        timeLabel.setOnClickListener(dateTimeOnClickListener);
     }
 
 /*    @Override
@@ -280,14 +395,16 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
 
         int nowButtonHeight = nowButton.getMeasuredHeight() +
                 nowButton.getPaddingTop() + nowButton.getPaddingBottom();
-        int dtLabelHeight = dtLabel.getMeasuredHeight() +
-                dtLabel.getPaddingTop() + dtLabel.getPaddingBottom();
+        int dtLabelHeight = timeLabel.getMeasuredHeight() +
+                timeLabel.getPaddingTop() + timeLabel.getPaddingBottom();
         int measuredHeight =
                 questionLabel.getMeasuredHeight() +
                         ( nowButtonHeight > dtLabelHeight ?
                                 nowButtonHeight :
                                 dtLabelHeight);
         constraints.constrainMinHeight(this.getId(), measuredHeight);
+
+        //Attach the question label to the top of the layout.
         constraints.connect(
                 this.getId(),
                 ConstraintSet.TOP,
@@ -295,6 +412,7 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
                 ConstraintSet.TOP,
                 questionLabel.getPaddingTop());
 
+        //Put the Now button and the D/T labels under the question label.
         constraints.connect(
                 nowButton.getId(),
                 ConstraintSet.TOP,
@@ -303,18 +421,34 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
                 questionLabel.getPaddingBottom());
 
         constraints.connect(
-                dtLabel.getId(),
+                timeLabel.getId(),
+                ConstraintSet.TOP,
+                questionLabel.getId(),
+                ConstraintSet.BOTTOM,
+                questionLabel.getPaddingBottom());
+
+        constraints.connect(
+                dateLabel.getId(),
+                ConstraintSet.TOP,
+                questionLabel.getId(),
+                ConstraintSet.BOTTOM,
+                questionLabel.getPaddingBottom());
+
+        //Put the date label to the right of the Now button.
+        constraints.connect(
+                dateLabel.getId(),
                 ConstraintSet.LEFT,
                 nowButton.getId(),
                 ConstraintSet.RIGHT,
                 nowButton.getPaddingRight());
 
+        //Put the time label to the right of the date label.
         constraints.connect(
-                dtLabel.getId(),
-                ConstraintSet.TOP,
-                questionLabel.getId(),
-                ConstraintSet.BOTTOM,
-                questionLabel.getPaddingBottom());
+                timeLabel.getId(),
+                ConstraintSet.LEFT,
+                dateLabel.getId(),
+                ConstraintSet.RIGHT,
+                nowButton.getPaddingRight());
         /*
         //Connect topmost label.
 
@@ -340,7 +474,7 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
                 this.getId(),
                 ConstraintSet.LEFT);
         constraints.connect(
-                dtLabel.getId(),
+                timeLabel.getId(),
                 ConstraintSet.LEFT,
                 this.getId(),
                 ConstraintSet.RIGHT);
@@ -352,13 +486,15 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
 
     public void repaint()
     {
-        dtLabel.invalidate();
+        timeLabel.invalidate();
     }
 
     public void repaintDTLabel()
     {
-        dtLabel.setText(this.dtQuestion.getAnswerAsText());
-        dtLabel.invalidate();
+        dateLabel.setText(this.dtQuestion.getDatePartOfAnswerAsString());
+        dateLabel.invalidate();
+        timeLabel.setText(this.dtQuestion.getTimePartOfAnswerAsString());
+        timeLabel.invalidate();
     }
     //Repainting, onDraw, invalidate, ViewConfiguration, "canvas api"
     //onMeasure, setMeasuredDimension()
@@ -369,8 +505,8 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
     {
         int nowButtonHeight = nowButton.getMeasuredHeight() +
                 nowButton.getPaddingTop() + nowButton.getPaddingBottom();
-        int dtLabelHeight = dtLabel.getMeasuredHeight() +
-                dtLabel.getPaddingTop() + dtLabel.getPaddingBottom();
+        int dtLabelHeight = timeLabel.getMeasuredHeight() +
+                timeLabel.getPaddingTop() + timeLabel.getPaddingBottom();
         int measuredHeight =
                 questionLabel.getMinHeight() +
                         ( nowButtonHeight > dtLabelHeight ?
@@ -389,7 +525,7 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
         //Tell the two contributors to the width to work out their measurements.
         //resolveSize(int size, MeasureSpec.)
         int widthPaddingLowerRow = nowButton.getPaddingLeft() + nowButton.getPaddingRight() +
-                dtLabel.getPaddingLeft() + dtLabel.getPaddingRight();
+                timeLabel.getPaddingLeft() + timeLabel.getPaddingRight();
 
         //int parentWidthMode = MeasureSpec.getMode(parentWidthMeasureSpec);
         int parentWidth = MeasureSpec.getSize(parentWidthMeasureSpec);
@@ -398,8 +534,8 @@ public class DateTimeQuestionLayout extends ConstraintLayout {
 
         int nowButtonHeight = nowButton.getMeasuredHeight() +
                 nowButton.getPaddingTop() + nowButton.getPaddingBottom();
-        int dtLabelHeight = dtLabel.getMeasuredHeight() +
-                dtLabel.getPaddingTop() + dtLabel.getPaddingBottom();
+        int dtLabelHeight = timeLabel.getMeasuredHeight() +
+                timeLabel.getPaddingTop() + timeLabel.getPaddingBottom();
         int measuredHeight =
                 questionLabel.getMeasuredHeight() +
                         ( nowButtonHeight > dtLabelHeight ?
