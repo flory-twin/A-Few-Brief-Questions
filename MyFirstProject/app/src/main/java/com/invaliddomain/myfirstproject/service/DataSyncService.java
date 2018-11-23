@@ -1,36 +1,22 @@
-package com.invaliddomain.myfirstproject.data;
+package com.invaliddomain.myfirstproject.service;
 
-import android.Manifest;
-import android.app.AlertDialog;
 import android.app.IntentService;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 
-import com.invaliddomain.myfirstproject.MainActivity;
-import com.invaliddomain.myfirstproject.data.DataManager.DayDate;
-import com.invaliddomain.myfirstproject.data.DataManager.IDataManager;
-import com.invaliddomain.myfirstproject.data.DataManager.LocalFilesystemDataManager;
-import com.invaliddomain.myfirstproject.data.intents.request.DataSyncPullIntent;
-import com.invaliddomain.myfirstproject.data.intents.request.DataSyncPushIntent;
-import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPullCompleteIntent;
-import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPullErrorIntent;
-import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPushCompleteIntent;
-import com.invaliddomain.myfirstproject.data.intents.response.DataSyncPushErrorIntent;
-import com.invaliddomain.myfirstproject.data.listeners.PullCompleteListener;
-import com.invaliddomain.myfirstproject.data.listeners.PullErrorListener;
-import com.invaliddomain.myfirstproject.data.listeners.PushCompleteListener;
-import com.invaliddomain.myfirstproject.data.listeners.PushErrorListener;
+import com.invaliddomain.myfirstproject.question.datetime.DayDate;
+import com.invaliddomain.myfirstproject.data.manager.IDataManager;
+import com.invaliddomain.myfirstproject.data.manager.LocalFilesystemDataManager;
+import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
+import com.invaliddomain.myfirstproject.service.listeners.PullCompleteListener;
+import com.invaliddomain.myfirstproject.service.listeners.PullErrorListener;
+import com.invaliddomain.myfirstproject.service.listeners.PushCompleteListener;
+import com.invaliddomain.myfirstproject.service.listeners.PushErrorListener;
 
 import java.util.ArrayList;
 import java.util.Date;
-
-import static java.security.AccessController.getContext;
 
 //IntentService?
 
@@ -85,7 +71,6 @@ public class DataSyncService extends IntentService {
 
     //onStartCommand
     //startService
-    //onDestroy
 
     @Override
     public IBinder onBind(Intent intent) {

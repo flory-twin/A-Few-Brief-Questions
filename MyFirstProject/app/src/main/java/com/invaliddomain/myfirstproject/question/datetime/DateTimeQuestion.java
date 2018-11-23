@@ -1,6 +1,6 @@
-package com.invaliddomain.myfirstproject.questions;
+package com.invaliddomain.myfirstproject.question.datetime;
 
-import com.invaliddomain.myfirstproject.questions.base.Question;
+import com.invaliddomain.myfirstproject.question.base.Question;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

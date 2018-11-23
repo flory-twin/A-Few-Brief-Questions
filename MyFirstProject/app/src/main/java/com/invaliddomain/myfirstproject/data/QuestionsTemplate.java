@@ -19,32 +19,32 @@ public class QuestionsTemplate {
                     1,
                     "When did you take your medications last night?",
                     "PM Meds",
-                    Class.forName("com.invaliddomain.myfirstproject.questions.DateTimeQuestion")));
+                    Class.forName("com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion")));
             templates.add(new QuestionTemplate(
                     2,
                     "When did you fall asleep last night?",
                     "Asleep",
-                    Class.forName("com.invaliddomain.myfirstproject.questions.DateTimeQuestion")));
+                    Class.forName("com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion")));
             templates.add(new QuestionTemplate(
                     3,
                     "When did you take your AM Ritalin at?",
                     "AM Rit",
-                    Class.forName("com.invaliddomain.myfirstproject.questions.DateTimeQuestion")));
+                    Class.forName("com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion")));
             templates.add(new QuestionTemplate(
                     4,
                     "When did you become stably conscious?",
                     "Up",
-                    Class.forName("com.invaliddomain.myfirstproject.questions.DateTimeQuestion")));
+                    Class.forName("com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion")));
             templates.add(new QuestionTemplate(
                     5,
                     "When did you finish dressing?",
                     "Dressed",
-                    Class.forName("com.invaliddomain.myfirstproject.questions.DateTimeQuestion")));
+                    Class.forName("com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion")));
             templates.add(new QuestionTemplate(
                     6,
                     "When did you eat breakfast?",
                     "Breakfast",
-                    Class.forName("com.invaliddomain.myfirstproject.questions.DateTimeQuestion")));
+                    Class.forName("com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion")));
         }
         catch(ClassNotFoundException e)
         {

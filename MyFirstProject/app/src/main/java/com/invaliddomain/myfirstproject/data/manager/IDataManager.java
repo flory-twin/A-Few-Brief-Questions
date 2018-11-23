@@ -1,9 +1,9 @@
-package com.invaliddomain.myfirstproject.data.DataManager;
+package com.invaliddomain.myfirstproject.data.manager;
 
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
+import com.invaliddomain.myfirstproject.question.datetime.DayDate;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 //For an asynchronous implementation.
 //Containing service handles client events.

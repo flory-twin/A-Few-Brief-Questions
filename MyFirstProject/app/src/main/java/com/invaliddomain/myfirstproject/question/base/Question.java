@@ -1,4 +1,4 @@
-package com.invaliddomain.myfirstproject.questions.base;
+package com.invaliddomain.myfirstproject.question.base;
 
 import java.util.ArrayList;
 

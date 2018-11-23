@@ -1,4 +1,4 @@
-package com.invaliddomain.myfirstproject.questions;
+package com.invaliddomain.myfirstproject.layout;
 
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
@@ -16,7 +16,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.invaliddomain.myfirstproject.R;
-import com.invaliddomain.myfirstproject.questions.DateTimeQuestion;
+import com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion;
 
 import java.util.Date;
 

@@ -15,14 +15,13 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.invaliddomain.myfirstproject.data.DataSyncService;
+import com.invaliddomain.myfirstproject.service.DataSyncService;
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
-import com.invaliddomain.myfirstproject.data.QuestionsTemplate;
-import com.invaliddomain.myfirstproject.data.listeners.PullCompleteListener;
-import com.invaliddomain.myfirstproject.data.listeners.PushCompleteListener;
-import com.invaliddomain.myfirstproject.questions.DateTimeQuestion;
-import com.invaliddomain.myfirstproject.questions.DateTimeQuestionLayout;
-import com.invaliddomain.myfirstproject.questions.base.Question;
+import com.invaliddomain.myfirstproject.service.listeners.PullCompleteListener;
+import com.invaliddomain.myfirstproject.service.listeners.PushCompleteListener;
+import com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion;
+import com.invaliddomain.myfirstproject.layout.DateTimeQuestionLayout;
+import com.invaliddomain.myfirstproject.question.base.Question;
 
 import java.util.ArrayList;
 

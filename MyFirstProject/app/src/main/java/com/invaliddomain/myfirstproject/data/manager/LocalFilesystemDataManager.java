@@ -1,9 +1,11 @@
-package com.invaliddomain.myfirstproject.data.DataManager;
+package com.invaliddomain.myfirstproject.data.manager;
 
 import android.app.Activity;
 import android.os.Environment;
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecordList;
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
+import com.invaliddomain.myfirstproject.question.datetime.DayDate;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -124,7 +126,7 @@ public class LocalFilesystemDataManager implements IDataManager {
 
     private Boolean doesRecordExistInCache(DayDate recordDate)
     {
-        return false;
+        return records.contains(recordDate);
     }
 
     /*

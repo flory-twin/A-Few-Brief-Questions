@@ -1,7 +1,7 @@
 package com.invaliddomain.myfirstproject.data;
-import com.invaliddomain.myfirstproject.data.DataManager.DayDate;
-import com.invaliddomain.myfirstproject.questions.DateTimeQuestion;
-import com.invaliddomain.myfirstproject.questions.base.Question;
+import com.invaliddomain.myfirstproject.question.datetime.DayDate;
+import com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion;
+import com.invaliddomain.myfirstproject.question.base.Question;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

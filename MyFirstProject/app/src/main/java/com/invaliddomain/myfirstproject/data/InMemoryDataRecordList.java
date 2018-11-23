@@ -1,7 +1,6 @@
 package com.invaliddomain.myfirstproject.data;
 
-import com.invaliddomain.myfirstproject.data.DataManager.DayDate;
-import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
+import com.invaliddomain.myfirstproject.question.datetime.DayDate;
 
 import java.util.ArrayList;
 
