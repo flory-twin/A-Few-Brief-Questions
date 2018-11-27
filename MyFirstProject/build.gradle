@@ -28,6 +28,6 @@ task clean(type: Delete) {
 
 configurations.all {
     resolutionStrategy {
-        force 'com.android.support:support-v7:25.3.1'
+        force 'com.android.support:support-v7:26.0.0'
     }
 }
