@@ -2,6 +2,12 @@ package com.invaliddomain.myfirstproject.question.base;
 
 import java.util.ArrayList;
 
+/**
+ * Contains a text question, a uuid, and a text answer.
+ * Provides listener functionality for changes to the answer.
+ */
+//TODO Neither the UUID system nor the question keying is enforced by this class!
+// I need a different pattern to make this work...
 public class Question {
     public interface AnswerUpdateListener {
         // These methods are the different events and
@@ -15,12 +21,15 @@ public class Question {
 
     public Question(String question)
     {
-        questionAsText = question;
-        answerAsText = "    -  -     :  :  ";
-        uuid = -1;
+        this(-1, question, "");
     }
 
-    public Question(String question, String answer, int uuid)
+    public Question(int uuidToSet, String question)
+    {
+        this(uuidToSet, question, "");
+    }
+
+    public Question(int uuid, String question, String answer)
     {
         questionAsText = question;
         answerAsText = answer;
@@ -47,16 +56,16 @@ public class Question {
         // 1. this is not the initialization phase for the answer, and
         // 2. the new answer differs from the old one.
         if (oldAnswer != null && !newAnswer.equals(oldAnswer)) {
-            this.notifyListeners();
+            this.notifyAnswerChangeListeners();
         }
     }
 
-    public void addListener(AnswerUpdateListener l)
+    public void addAnswerChangeListener(AnswerUpdateListener l)
     {
         listeners.add(l);
     }
 
-    protected void notifyListeners()
+    protected void notifyAnswerChangeListeners()
     {
         for (AnswerUpdateListener l: listeners)
         {

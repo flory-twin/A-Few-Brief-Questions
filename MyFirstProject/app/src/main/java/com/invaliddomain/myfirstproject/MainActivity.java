@@ -15,15 +15,18 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.invaliddomain.myfirstproject.question.datetime.DayDate;
 import com.invaliddomain.myfirstproject.service.DataSyncService;
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
 import com.invaliddomain.myfirstproject.service.listeners.PullCompleteListener;
+import com.invaliddomain.myfirstproject.service.listeners.PullErrorListener;
 import com.invaliddomain.myfirstproject.service.listeners.PushCompleteListener;
 import com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion;
 import com.invaliddomain.myfirstproject.layout.DateTimeQuestionLayout;
 import com.invaliddomain.myfirstproject.question.base.Question;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity{
     private InMemoryDataRecord questions;
     private ArrayList<DateTimeQuestionLayout> dtQuestionViews;
     private DataSyncService syncService;
+    private String lastErrorMessage;
     private boolean syncServiceIsBound;
     private PushCompleteListener pushCompleteListener;
 
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity{
 
         //this.requestExternalFilesystemWritePermission();
         this.setUpService();
+        this.requestExternalFilesystemWritePermission();
 
         this.dtQuestionViews = new ArrayList<DateTimeQuestionLayout>();
         this.setUpQuestions();
@@ -122,18 +127,46 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
 
 
     private void setUpQuestions() {
-        //Set a default record in case no record can be pulled.
+        //Set a default record (0 questions) in case no record can be pulled.
         questions = new InMemoryDataRecord();
+
+
         syncService.addPullCompleteListener(new PullCompleteListener() {
             @Override
             public void onPullComplete(InMemoryDataRecord pulledRecord) {
                 questions = pulledRecord;
             }
         });
+        syncService.addPullErrorListener(new PullErrorListener() {
+            @Override
+            public void onPullError(Exception e) {
+                lastErrorMessage = e.getMessage();
+                //Set up a question from template.
+
+                questions = new InMemoryDataRecord();
+                questions.initializeRecordFromTemplate(
+                        new DayDate(new Date()));
+            }
+        });
         syncService.pull(); //This should spawn a callback with the record...
 
+        int totalMillis = 0;
+        while (questions.isAnswerInitialized() == false
+                && totalMillis < 2000
+                && lastErrorMessage == "")
+        {
+            try {
+                totalMillis += 500;
+                Thread.sleep(totalMillis);
+            }
+            catch(InterruptedException e)
+            {
+                //No action.
+            }
+        }
+
         for (Question q : questions.getQuestions()) {
-            q.addListener(new Question.AnswerUpdateListener() {
+            q.addAnswerChangeListener(new Question.AnswerUpdateListener() {
                 @Override
                 public void onAnswerUpdated(){
                     try
@@ -164,7 +197,8 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
 
 
     /**
-     * This is an ugly design decision.  If writing to the local filesystem, we need write permissions that are activity-based.  Because they're activity-based, the call cannot be isolated to the filesystem writer.
+     * This is an ugly design decision...
+     * If writing to the local filesystem, we need write permissions that are activity-based.  Because they're activity-based, the call cannot be isolated to the filesystem writer.
      *
      */
     public void requestExternalFilesystemWritePermission(){

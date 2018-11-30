@@ -30,6 +30,8 @@ public class DataSyncService extends IntentService {
     private ArrayList<PullCompleteListener> pullCompletionListeners;
     private ArrayList<PushErrorListener> pushErrorListeners;
     private ArrayList<PullErrorListener> pullErrorListeners;
+    private IDataManager dataStore;
+    private final IBinder serviceBinding = new DataSyncBinder();
     /**
      * Sample code from the Android notes on Service.
      *
@@ -43,8 +45,7 @@ public class DataSyncService extends IntentService {
         }
     }
 
-    private IDataManager dataStore;
-    private final IBinder serviceBinding = new DataSyncBinder();
+
 
 
     /*

@@ -3,43 +3,40 @@ import com.invaliddomain.myfirstproject.question.datetime.DayDate;
 import com.invaliddomain.myfirstproject.question.datetime.DateTimeQuestion;
 import com.invaliddomain.myfirstproject.question.base.Question;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ * Provides a master record for the questions present in a questionnaire.
+ * Manages UUIDs and question content.
+ * Does not provide push/pull or change listener functionality.
+ */
 public class InMemoryDataRecord {
     private ArrayList<Question> questions;
     private DayDate recordDate;
+    private boolean answerInitialized;
 
+    /**
+     * Sets up a valid--but empty--question list.
+     */
     public InMemoryDataRecord() {
-
-        this(new DayDate(new Date()));
+        questions = new ArrayList<Question>();
+        answerInitialized = false;
     }
 
-    public InMemoryDataRecord(DayDate existingDate) {
+    /**
+     * Initializes a question list from the template.
+     * @param dateToCreate
+     */
+    public void initializeRecordFromTemplate(DayDate dateToCreate) {
         //This is the master spot which controls which questions appear on the screen and in the results file.
         questions = new ArrayList<Question>();
         initializeQuestions();
-        recordDate = existingDate;
-    }
-
-    public InMemoryDataRecord(String recordAsString)
-    {
-        questions = new ArrayList<Question>();
-        initializeQuestions();
-        try {
-            this.deserialize(recordAsString);
-
-            int uuidToSearchFor = 3;
-            int recordDateIndex = QuestionsTemplate.getIndex(uuidToSearchFor);
-            this.recordDate = new DayDate(
-                    ((DateTimeQuestion) questions.get(recordDateIndex))
-                            .getAnswerAsDate());
-        }
-        catch (Exception e)
-        {
-            //Something's wrong with that record!  For now, just stick with the default values.
-        }
+        recordDate = dateToCreate;
+        answerInitialized = false;
     }
 
     public void initializeQuestions() {
@@ -48,6 +45,16 @@ public class InMemoryDataRecord {
             if (qt.getQuestionType().getSimpleName().equals("DateTimeQuestion")) {
                 questions.add(new DateTimeQuestion(qt.getQuestion()));
             }//else if other class....
+        }
+        //Now, add change listeners so we can tell the user whether this is a clean cache or a dirty cache.
+        for (Question q: questions)
+        {
+            q.addAnswerChangeListener(new Question.AnswerUpdateListener() {
+                @Override
+                public void onAnswerUpdated() {
+                    answerInitialized = true;
+                }
+            });
         }
     }
 
@@ -124,9 +131,6 @@ public class InMemoryDataRecord {
         String[] fields = record.split(",");
         //Assume that the data from the record is in the order given by the standard question template.
         //Assume that this is not a header row.
-        //Set up the record using the first timed question known to contain today's date.
-        //TODO: Migrate questions to R.
-        this.setRecordDateFromAnswers();
         //Now, deserialize the fields.  Since the Question arraylist was used to initialize the questions, these fields will be in the same order as in the questions.
         //Note that using the Question constructor won't activate the change listener, which is exactly how we want things.
         for (int i = 0; i < questions.size(); i++)
@@ -139,15 +143,40 @@ public class InMemoryDataRecord {
             {
                 Question oldQuestion = questions.get(i);
                 questions.remove(i);
-                Date answerAsDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                                .parse(fields[i]);
-                questions.add(i,
-                        new DateTimeQuestion(
-                            questionText,
-                            answerAsDate,
-                            oldQuestion.getUuid())
-                        );
+                Date answerAsDate = null;
+                try {
+                    answerAsDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                            .parse(fields[i]);
+                    questions.add(i,
+                            new DateTimeQuestion(
+                                    oldQuestion.getUuid(),
+                                    questionText,
+                                    answerAsDate)
+                    );
+                }
+                catch (ParseException e)
+                {
+                    //The provided date was unparsable, so leave the value unset.
+                    questions.add(i,
+                            new DateTimeQuestion(
+                                    oldQuestion.getUuid(),
+                                    questionText)
+                    );
+                }
             }
         }
+        //Set up the record using the first timed question known to contain today's date.
+        this.setRecordDateFromAnswers();
+    }
+
+    private ArrayList<String> splitOnCommas(String toSplit)
+    {
+        //String.split() doesn't work because it ignores 0-length splits.
+        return new ArrayList<String>();
+    }
+
+    public boolean isAnswerInitialized()
+    {
+        return this.answerInitialized;
     }
 }

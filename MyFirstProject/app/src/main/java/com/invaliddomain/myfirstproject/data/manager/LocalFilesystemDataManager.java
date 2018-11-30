@@ -13,6 +13,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 
+/**
+ * Does not provide a pull or listener policy.
+ */
 public class LocalFilesystemDataManager implements IDataManager {
     private static String filename;
     // /storage/emulated/0/Documents in emulated device.
@@ -26,8 +29,6 @@ public class LocalFilesystemDataManager implements IDataManager {
     // So, in with the old, out with the new!
     private File dataFile;
     private InMemoryDataRecordList records;
-    //Necessary for checking our write permissions.
-    private Activity activity;
 
     public LocalFilesystemDataManager()
     {
@@ -35,7 +36,11 @@ public class LocalFilesystemDataManager implements IDataManager {
         dataFile = new File(directory, filename);
     }
 
-
+    public LocalFilesystemDataManager(File toReadAndWrite)
+    {
+        records = new InMemoryDataRecordList();
+        dataFile = toReadAndWrite;
+    }
     //send on "Send"; pull from Drive every time entered; "Refresh" button
     //Check first on local file.
     //CSV format
@@ -92,14 +97,14 @@ public class LocalFilesystemDataManager implements IDataManager {
         //FileReader, FileWriter
         String line = "";
         BufferedReader br = new BufferedReader(new FileReader(dataFile));
-        while ((line = br.readLine()) != null)
+        line = br.readLine();
+        while (line != null)
         {
-            records.add(new InMemoryDataRecord(line));
+            InMemoryDataRecord recordOnLine = new InMemoryDataRecord();
+            recordOnLine.deserialize(line);
+            records.add(recordOnLine);
         }
-
-
-        //...........................
-
+        br.close();
     }
 
     @Override
@@ -182,12 +187,20 @@ public class LocalFilesystemDataManager implements IDataManager {
 
     private boolean checkFileReadableAndThrow() throws Exception
     {
+        if (!dataFile.exists())
+        {
+            throw new Exception(
+                    "File " +
+                            dataFile.getCanonicalPath() +
+                            " cannot be read because it does not exist.");
+        }
         if (!dataFile.canRead())
         {
             throw new Exception(
                     "File " +
                             dataFile.getCanonicalPath() +
-                            " cannot be read due to permissions issues.");
+                            " exists but cannot be read. This is likely " +
+                            "due to permissions issues, a readonly condition, or a file lock.");
         }
         //else
         return true;
@@ -195,12 +208,20 @@ public class LocalFilesystemDataManager implements IDataManager {
 
     private boolean checkFileWritableAndThrow() throws Exception
     {
+        if (!dataFile.exists())
+        {
+            throw new Exception(
+                    "File " +
+                            dataFile.getCanonicalPath() +
+                            " cannot be written because it does not exist.");
+        }
         if (!dataFile.canWrite())
         {
             throw new Exception(
                     "File " +
                             dataFile.getCanonicalPath() +
-                            " cannot be written due to permissions issues.");
+                            " exists but cannot be written. This is likely due to " +
+                            "permissions issues, a readonly condition, or a file lock.");
         }
         //else
         return true;

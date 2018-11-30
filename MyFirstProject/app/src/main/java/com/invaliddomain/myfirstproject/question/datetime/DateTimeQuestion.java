@@ -15,11 +15,20 @@ public class DateTimeQuestion extends Question {
         answerAsDate = null;
     }
 
-    public DateTimeQuestion(String questionText, Date answer, int uuid)
+    public DateTimeQuestion(int uuid, String questionText)
     {
-        super(questionText,
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(answer),
-                uuid);
+        super(uuid,
+                questionText
+        );
+        answerAsDate = null;
+    }
+
+    public DateTimeQuestion(int uuid, String questionText, Date answer)
+    {
+        super(uuid,
+                questionText,
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(answer)
+                );
         answerAsDate = answer;
     }
 
@@ -67,7 +76,7 @@ public class DateTimeQuestion extends Question {
     {
         answerAsDate = date;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        //Note: This has to be super--otherwise the change listeners won't fire.
+        //Note: This has to be super--otherwise the change listeners on Question won't fire.
         super.setAnswerAsText(format.format(answerAsDate));
     }
 
