@@ -1,5 +1,7 @@
 package com.invaliddomain.myfirstproject.data.manager;
 
+import android.support.annotation.Nullable;
+
 import com.invaliddomain.myfirstproject.data.InMemoryDataRecord;
 import com.invaliddomain.myfirstproject.question.datetime.DayDate;
 
@@ -12,6 +14,7 @@ public interface IDataManager {
     public void pushAllRecords() throws Exception;
     public void addToOrUpdateCache(InMemoryDataRecord recordToAddOrUpdate);
     public ArrayList<InMemoryDataRecord> getAllCachedRecords();
+    @Nullable
     public InMemoryDataRecord getCachedRecord(DayDate fromThisDate) throws Exception;
     public void pullAllRecords() throws Exception;
 }

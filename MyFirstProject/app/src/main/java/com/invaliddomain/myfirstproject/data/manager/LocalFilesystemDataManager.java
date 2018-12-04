@@ -63,7 +63,7 @@ public class LocalFilesystemDataManager implements IDataManager {
         }
         else
         {
-            throw new Exception("The record for " + fromThisDate.toString() + " is not in the cache.");
+            return null;
         }
     }
     //public void pushAllRecords(InMemoryDataRecord record);
@@ -103,6 +103,7 @@ public class LocalFilesystemDataManager implements IDataManager {
             InMemoryDataRecord recordOnLine = new InMemoryDataRecord();
             recordOnLine.deserialize(line);
             records.add(recordOnLine);
+            line = br.readLine();
         }
         br.close();
     }

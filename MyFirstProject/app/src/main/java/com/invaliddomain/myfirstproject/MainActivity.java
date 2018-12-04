@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity{
     private DataSyncService syncService;
     private String lastErrorMessage;
     private boolean syncServiceIsBound;
+    private boolean spinlock;
     private PushCompleteListener pushCompleteListener;
 
     /**
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity{
             DataSyncService.DataSyncBinder binder = (DataSyncService.DataSyncBinder) serviceBinder;
             syncService = binder.getService();
             syncServiceIsBound = true;
+            spinlock = false;
         }
 
         @Override
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         //this.setContentView(dtqv.getQuestionAnswerLayout());
         this.setContentView(R.layout.activity_main);
+        this.spinlock = false;
 
         //this.requestExternalFilesystemWritePermission();
         this.setUpService();
@@ -127,14 +130,15 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
 
 
     private void setUpQuestions() {
+        boolean recordIsReady = false;
         //Set a default record (0 questions) in case no record can be pulled.
         questions = new InMemoryDataRecord();
-
 
         syncService.addPullCompleteListener(new PullCompleteListener() {
             @Override
             public void onPullComplete(InMemoryDataRecord pulledRecord) {
                 questions = pulledRecord;
+                spinlock = false;
             }
         });
         syncService.addPullErrorListener(new PullErrorListener() {
@@ -146,13 +150,16 @@ RSSPullService.enqueueWork(getContext(), RSSPullService.class, RSS_JOB_ID, mServ
                 questions = new InMemoryDataRecord();
                 questions.initializeRecordFromTemplate(
                         new DayDate(new Date()));
+                spinlock = false;
             }
         });
+        spinlock = true;
         syncService.pull(); //This should spawn a callback with the record...
 
+
         int totalMillis = 0;
-        while (questions.isAnswerInitialized() == false
-                && totalMillis < 2000
+        while (spinlock == true
+                && totalMillis < 5000
                 && lastErrorMessage == "")
         {
             try {

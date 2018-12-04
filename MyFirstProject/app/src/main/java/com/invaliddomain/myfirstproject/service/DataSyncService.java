@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import com.invaliddomain.myfirstproject.question.datetime.DayDate;
 import com.invaliddomain.myfirstproject.data.manager.IDataManager;
@@ -92,17 +93,25 @@ public class DataSyncService extends IntentService {
 
     /**
      * Attempts to find a record for today's date.  If found, this record is used to populate the local cache.
-     * @return
+     * @return Either the cached record for today's date, or a new record.
      */
+    @Nullable
     public void pull()
     {
         try
         {
             this.dataStore.pullAllRecords();
-            this.notifyPullCompletionListeners(
-                    dataStore.getCachedRecord(
-                            new DayDate(
-                                    new Date())));
+            InMemoryDataRecord cachedRecord = dataStore.getCachedRecord(new DayDate(new Date()));
+            if (cachedRecord != null)
+            {
+                this.notifyPullCompletionListeners(cachedRecord);
+            }
+            else {
+                this.notifyPullCompletionListeners(
+                        dataStore.getCachedRecord(
+                                new DayDate(
+                                        new Date())));
+            }
         }
         catch (Exception e)
         {
